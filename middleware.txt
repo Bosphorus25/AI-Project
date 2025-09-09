@@ -1,0 +1,59 @@
+How do I know which middleware is suitable?
+
+Think of middleware as pluggable layers between client and server. The kind you use depends on your project type (website, API, SaaS, etc.) and requirements.
+
+✅ Common Middleware Use Cases (most projects need these)
+
+CORS (Cross-Origin Resource Sharing)
+
+Needed if your frontend (e.g., React/Next.js) runs on a different domain/port than your API.
+
+Example: http://localhost:3000 (Next.js) calling http://localhost:8000 (FastAPI).
+
+FastAPI already has CORSMiddleware built-in.
+
+Logging & Monitoring
+
+Track request time, IP, user agent, etc.
+
+Useful in production to debug slow APIs.
+
+Authentication/Authorization
+
+Check if the request contains valid tokens (JWT, OAuth2, API keys).
+
+Usually middleware intercepts and rejects invalid requests.
+
+Error Handling / Custom Responses
+
+Convert unhandled exceptions into a standard JSON format.
+
+🛠️ FastAPI built-in vs custom
+
+FastAPI built-in middlewares (like CORSMiddleware) are enough 90% of the time.
+
+Custom middleware is needed when:
+
+You want special logic (e.g., logging to a database, enforcing per-user rate limits).
+
+Your project has specific compliance needs (banking, healthcare, etc.).
+
+You want to replace/extend built-in features.
+
+🔹 Real Developer Talk
+
+In teams, engineers usually say things like:
+
+“We need to add CORS middleware so frontend can hit the API.”
+
+“Let’s add a request logger to catch performance bottlenecks.”
+
+“Auth middleware should reject any request without a valid JWT.”
+
+👉 For your course project (API + frontend Next.js + Docker):
+
+You’ll definitely need CORS.
+
+You’ll definitely need logging.
+
+You’ll probably add auth middleware when you build login/LLM parts.

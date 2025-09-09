@@ -1,8 +1,11 @@
-from fastapi import FastAPI,HTTPException    # the FastAPI class is import from a dependency fastapi
+from fastapi import APIRouter,HTTPException    # the FastAPI class is import from a dependency fastapi
 from pydantic import BaseModel
-app = FastAPI()          # here object is creating app the main application to make apis 
+school_router = APIRouter(
+    prefix= "/school",
+    tags= ["school"]
+)
 
-@app.get("/student/{id}")
+@school_router.get("/student/{id}")
 def data(id: int):
     try:
         database = {
@@ -35,7 +38,7 @@ def data(id: int):
 
 
 
-@app.get("/search")
+@school_router.get("/search")
 def search(class_: int):
     try:
         database = {
@@ -72,7 +75,7 @@ class data(BaseModel):
     name: str
     class_: int
 
-@app.post("/add_student")
+@school_router.post("/add_student")
 def school(data: data):
     try:
         database = {
