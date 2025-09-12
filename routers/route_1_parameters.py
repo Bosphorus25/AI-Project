@@ -12,26 +12,13 @@ def wow():
 
 @students_router.get("/cnic/{student_cnic}")     # this function linked with utils
 def authentic(student_cnic: int):
-    try:
-        check = validation(student_cnic)
-        return{
-            "status": "sucess",
-            "message": "cnic entered sucessfully",
-            "data": check
-            }
-    except HTTPException as e:
-        return{
-            "status": "error",
-            "message": str(e),
-            "data": None
+    check = validation(student_cnic)
+    return{
+        "status": "sucess",
+        "message": "cnic entered sucessfully",
+        "data": check
         }
-    except Exception as e:
-        return{
-            "status": "error",
-            "message": str(e),
-            "data": None
-        }
-
+  
 
     
 
