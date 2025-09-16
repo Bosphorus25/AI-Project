@@ -63,3 +63,72 @@ Table of status codes
 | **422 Unprocessable Entity**  | Validation failed             | Wrong data type              | Sending string instead of int  |
 | **500 Internal Server Error** | Server-side error             | Unhandled exception          | Bug in code or DB crash        |
 | **503 Service Unavailable**   | Server down / overloaded      | Maintenance mode             | API temporarily offline        |
+
+
+
+
+
+
+Making setup of sql database alembic models and configuration
+
+learning sql type postgresql our db cloud provider is neon.tech
+
+to learn and understand our database from ui use TablePlus dosen't matter which cloud or nosql db type we are using paste db uri in Tableplus to make connection.
+
+to setup whole project make a folder structure.
+
+add these libraries 
+poetry add sqlalchemy     a library used to make schema perform sqlalchemy methods that             postgress understand and to perform CRUD
+
+poetry add alembic          (it is a package a collection of modules organized in a directory
+                            A collection of modules organized in a directory. It often includes an __init__.py file to indicate it is a package.)                
+poetry add psycopg2-binary
+
+alembic is used to make schema of table in db
+
+to setup alembic run this command a new "alembic" folder and "alembic.ini" file is auto generated with it
+
+poetry run alembic init alembic
+
+to connect db with alembic paste db uri in env.py # overwrite sqlalchemy.url in alembic.ini
+config.set_main_option("sqlalchemy.url", DATABASE_URL)
+
+now create a file.py to make models every new table that is formed is called model in model we define schema of a table
+
+
+
+every time we make changes in youtube_model a new copy of model is saved in alembic.version
+
+make a class model as Youtube in which we define python class for table youtube
+
+import required modules
+
+from sqlalchemy import Column, Integer, String, Boolean, DateTime           to define table schema
+from sqlalchemy.ext.declarative import declarative_base
+
+In SQLAlchemy, declarative base is a factory function that creates a base class for your database models. This base class provides the foundation for defining your tables and their relationships in an object-oriented way.Instead of writing raw SQL to create tables, you define Python classes that represent your tables, and SQLAlchemy takes care of translating those classes into SQL statements.
+
+after creating a class model make a connection between alembic and models
+
+import Base in alembic.env from folder.file eg"from models.youtube_model import Base" and change target_metadata = Base.metadata
+
+Running Migrations
+Whenever you make changes to your models, run the following command this makes a copy of file in versions with new changes
+
+poetry run alembic revision --autogenerate -m "any name here you want for your changes"
+
+till now no changes appear in db the changes appear only in versions 
+
+to apply migrations on db run following command
+
+poetry run alembic upgrade head
+
+now the process to make and manage schema through alembic ended
+
+our next step is to apply crud on db from fastapi
+
+before applying crud make a folder config and a file database.py in config to make a connection between db and fastapi 
+
+import create_engine and session maker from sqlalchemy 
+
+connect engine with db_uri and bind engine in sessionmaker
