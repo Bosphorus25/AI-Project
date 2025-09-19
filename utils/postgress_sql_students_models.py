@@ -4,6 +4,20 @@ import datetime
 
 Base = declarative_base()
 
+class authentic(Base):
+    __tablename__ = "student_signup"
+
+    id = Column(Integer, primary_key= True, index= True)
+
+    username = Column(String, nullable= False, index= True)
+
+    email = Column(String, nullable= False)
+
+    Password = Column(String, nullable= False)
+
+    student_table_1 = Relationship("student", back_populates="authentic_table")
+
+
 class student(Base):
     __tablename__ = "students_degree_certificate"
 
@@ -25,7 +39,11 @@ class student(Base):
 
     created_at = Column(DateTime, default= datetime.datetime.now() )
 
+    student_signup_id = Column(Integer, ForeignKey(authentic.id))
+
     courses_table = Relationship("courses", back_populates="student_table")
+
+    authentic_table = Relationship("authentic", back_populates="student_table_1")
 
 
 class courses(Base):
@@ -35,3 +53,5 @@ class courses(Base):
     books = Column(String, nullable= False)
     student_id = Column(Integer, ForeignKey(student.id))        # making a link with student.id student_courses
     student_table = Relationship("student", back_populates="courses_table")
+
+

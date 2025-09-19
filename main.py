@@ -12,7 +12,7 @@ app = FastAPI()          # here object is creating app the main application to m
 
 add_exception_handlers(app)          # handlers are connected with main 
 
-os.makedirs( config.static_folder_files_upload, exist_ok= True)       # make sure folder exist if not make it
+os.makedirs( config.Upload_folder, exist_ok= True)       # make sure folder exist if not make it
 
 # mount the folder static so files can be assed via url
 app.mount("/static", StaticFiles(directory=config.Upload_folder), name="static")

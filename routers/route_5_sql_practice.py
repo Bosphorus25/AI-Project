@@ -1,9 +1,10 @@
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 from utils.database import get_db
-from utils.postgress_sql_students_models import student, courses
-from pydantic import BaseModel
-from typing import List, Optional
+from utils.jwt_token_setup import create_jwt_token, verify_token, hash_password, verify_hash_password
+from utils.postgress_sql_students_models import student, courses, authentic
+from pydantic import BaseModel , Field, EmailStr
+from typing import List
 
 degree_router = APIRouter(
     prefix="/generate_result",
@@ -18,10 +19,11 @@ class student_data(BaseModel):
     address: str
     age: int 
     roll_number: int
+    student_signup_id: int
 
 
 @degree_router.post("/result")
-def result(student_data: student_data, db: Session = Depends(get_db)):
+def result(student_data: student_data, token_verify= Depends(verify_token), db: Session = Depends(get_db)):
     check_schema = student(
         name=student_data.name,
         corse_duration= student_data.corse_duration,
@@ -29,15 +31,16 @@ def result(student_data: student_data, db: Session = Depends(get_db)):
         corse_compleated=student_data.corse_compleated,   # posting one student data to db tested
         address= student_data.address, 
         age= student_data.age, 
-        roll_number= student_data.roll_number)
+        roll_number= student_data.roll_number,
+        student_signup_id= student_data.student_signup_id)
     db.add(check_schema)
     db.commit()
     db.refresh(check_schema)
     return check_schema
 
-
+# token varification checked here
 @degree_router.get("/get_all_students_result")
-def get_all_students_result(db: Session = Depends(get_db)):    # fetching all data from table tested
+def get_all_students_result(token_verify= Depends(verify_token), db: Session = Depends(get_db)):    # fetching all data from table tested
     return db.query(student).all()
 
 @degree_router.get("/get_one_student/{id}")
@@ -91,7 +94,7 @@ class student_courses(BaseModel):
 
 
 @degree_router.post("/add_student_courses")
-def add_student_courses(student_courses: student_courses, db: Session= Depends(get_db)):
+def add_student_courses(student_courses: student_courses,token_verify= Depends(verify_token), db: Session= Depends(get_db)):
     db_student = db.query(student).filter(student.id == student_courses.id).first()  
     if not db_student:
         raise HTTPException(status_code=404, detail="student not found")
@@ -118,3 +121,46 @@ def get_a_student(id: int, db: Session= Depends(get_db)):
          "courses": [b.books for b in db_student.courses_table]
     }
     
+
+# test generate jwt token with signup login
+
+class signup(BaseModel):
+    username: str
+    email: EmailStr
+    password: str = Field(min_length= 6)
+
+# signup
+@degree_router.post("/signup_here")
+def signup_here(signup: signup, db: Session= Depends(get_db)):
+    hashed_pswd = hash_password(signup.password)
+    add_db = authentic(
+        username= signup.username,
+        email= signup.email,
+        Password= hashed_pswd
+    )
+    db.add(add_db)
+    db.commit()
+    db.refresh(add_db)
+    return{
+        "message": "signup sucessfully"
+    }
+
+# login
+@ degree_router.post("/login_here")
+def login_here(data: signup, db: Session= Depends(get_db)):
+    db_user = db.query(authentic).filter(authentic.email == data.email).first()
+
+    if not db_user:  # user not found
+        raise HTTPException(status_code=401, detail="invalid email")
+    if data.username != db_user.username:
+        raise HTTPException(status_code=401, detail="invalid username")
+    if not verify_hash_password(data.password, db_user.Password):
+        raise HTTPException(status_code=401, detail="invalid credentials")
+    token = create_jwt_token(data={
+        "username": data.username,
+        "email": data.email,
+    })
+    return{
+        "message": "token generated sucessflly",
+        "data": token
+    }
