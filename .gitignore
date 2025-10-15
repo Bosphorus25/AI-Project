@@ -1,1 +1,4 @@
 .env
+llm_development_training_testing/train_data_images/
+llm_development_training_testing/test_data_images/
+llm_development_training_testing/cat_dog_model.h5
